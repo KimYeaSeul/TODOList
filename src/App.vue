@@ -1,67 +1,70 @@
 <template>
-  <div id="app">
-    <TodoHeader></TodoHeader>
-    <TodoInput v-on:addTodo="addTodo"></TodoInput>
-    <TodoList v-bind:propsdata="todoItems" @removeTodo="removeTodo"></TodoList>
-    <TodoFooter v-on:removeAll="clearAll"></TodoFooter>
+  <nav class="navbar navbar-expand-lg navbar-light bg-light">
+    <router-link
+      class="navbar-brand"
+      :to="{ name: 'Home' }"
+    >
+      <!-- to="/" 페이지가 많아지면 유지보수가 힘들다. -->
+      YS coder
+    </router-link>
+    <ul class="navbar-nav mr-auto">
+      <li class="nav-item active">
+        <router-link
+          class="nav-link"
+          :to="{ name: 'Todos' }"
+        >
+          Todos
+        </router-link>
+      </li>
+    </ul>
+  </nav>
+  <div class="container">
+    <router-view />
   </div>
+  <Transition name="slide">
+    <Toast
+      v-if="showToast"
+      message="toastMessage"
+      :type="toastAlertType"
+    />
+  </Transition>
 </template>
 
 <script>
-import TodoHeader from './components/TodoHeader.vue'
-import TodoInput from './components/TodoInput.vue'
-import TodoList from './components/TodoList.vue'
-import TodoFooter from './components/TodoFooter.vue'
+import Toast from "@/components/Toast.vue";
+import { useToast } from "@/composables/toast";
 
 export default {
-  data(){
-    return{
-      todoItems:[]
-    }
+  components: { Toast },
+  setup() {
+    const { triggerToast, toastAlertType, toastMessage, showToast } =
+      useToast();
+
+    console.log(showToast.value);
+
+    return {
+      triggerToast,
+      toastAlertType,
+      toastMessage,
+      showToast,
+    };
   },
-  methods:{
-    addTodo(todoItem){
-      localStorage.setItem(todoItem, todoItem);
-      this.todoItems.push(todoItem);
-    },
-    clearAll(){
-      localStorage.clear();
-      this.todoItems = [];
-    },
-    removeTodo(todoItem, index){
-      localStorage.removeItem(todoItem);
-      this.todoItems.splice(index, 1);
-    }
-  },
-  components:{
-    'TodoHeader': TodoHeader,
-    'TodoInput': TodoInput,
-    'TodoList' : TodoList,
-    'TodoFooter' : TodoFooter
-  },
-  created(){
-    if(localStorage.length > 0){
-      for(var i = 0; i<localStorage.length; i++){
-        this.todoItems.push(localStorage.key(i));
-      }
-    }
-  },
-}
+};
 </script>
 
-<style>
-body{
-    text-align: center;
-    background-color:#F6F6F8;
+<style scoped>
+.slide-enter-active,
+.slide-leave-active {
+  transition: all 0.5s ease;
 }
-input{
-    border-style:groove;
-    width:200px;
+.slide-enter-from,
+.slide-leave-to {
+  opacity: 0;
+  transform: translateY(-30px);
 }
-button{
-  border-style: groove;
-}
-.shadow{
-  box-shadow: 5px 10px 10px rgba(0,0,0,0.03)
+.slide-enter-to,
+.slide-leave-from {
+  opacity: 1;
+  transform: translateY(0px);
 }
 </style>
